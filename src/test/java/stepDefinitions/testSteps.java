@@ -20,6 +20,7 @@ import apiEngine.model.Requests.RemoveBookRequest;
 import apiEngine.model.Response.Token;
 import apiEngine.model.Response.UserAccount;
 import apiEngine.model.Response.getBooks;
+import apiTests.Endpoints;
 
 
 
@@ -33,7 +34,7 @@ public class testSteps {
 	private static final String BASE_URL = "https://bookstore.toolsqa.com";
 	
 	//private static String bookId;
-	//private static String token;
+	//private static Token token;
 	
 	private static Token tokenResponse;
 	private static Book book;
@@ -69,34 +70,38 @@ public class testSteps {
 //		       
 //		       String token =  JsonPath.from(jsonString).get("token");
 		
-		AuthorizationRequest authRequest = new AuthorizationRequest("TOOLSQA-Test", "Test@@123");
-		RestAssured.baseURI=BASE_URL;
+		AuthorizationRequest authRequest = new AuthorizationRequest(USERNAME, PASSWORD);
+		//RestAssured.baseURI=BASE_URL;
 		
-		RequestSpecification request =  RestAssured.given();
+		//RequestSpecification request =  RestAssured.given();
 		
-		request.header("Content-Type","application/json");
+		//request.header("Content-Type","application/json");
 		
-		 response =  request.body(authRequest).post("/Account/v1/GenerateToken");
+		 //response =  request.body(authRequest).post("/Account/v1/GenerateToken");
 		
 		//String jsonString =  response.asString();
 		
 	//	token =  JsonPath.from(jsonString).get("token");
 		
-		tokenResponse =   response.getBody().as(Token.class);
+		//tokenResponse =   response.getBody().as(Token.class);
 		
-		System.out.println(tokenResponse);
+		//System.out.println(tokenResponse);
 		
+		response = Endpoints.generateToken(authRequest);
+		
+		tokenResponse = response.getBody().as(Token.class);
 		
 	}
+	
 
 	@Given("A list of books is available")
 	public void a_list_of_books_is_available() {
 
-				RestAssured.baseURI=BASE_URL;
+				//RestAssured.baseURI=BASE_URL;
 		
-				RequestSpecification request =  RestAssured.given();
+				//RequestSpecification request =  RestAssured.given();
 				
-				Response response =  request.get("/BookStore/v1/Books");
+				//Response response =  request.get("/BookStore/v1/Books");
 				
 				//String jsonString =  response.asString();
 				
@@ -106,12 +111,16 @@ public class testSteps {
 				  
 				 // System.out.println(bookId);
 				
-				 books = response.getBody().as(getBooks.class);
+				 
 				
+				
+				
+				//System.out.println(book);
+		
+				response = Endpoints.getBooks();
+				books = response.getBody().as(getBooks.class);
 				book =  books.books.get(0);
 				
-				System.out.println(book);
-		
 		
 	}
 
@@ -120,16 +129,17 @@ public class testSteps {
 	public void user_adds_book_to_reading_list() {
 		
 		AddBookRequest addbookRequest = new AddBookRequest(USER_ID, new ISBN(book.isbn));
-		RestAssured.baseURI=BASE_URL;
+		//RestAssured.baseURI=BASE_URL;
 		
-		RequestSpecification request =  RestAssured.given();
+		//RequestSpecification request =  RestAssured.given();
 		
-		request.header("Authorization","Bearer" +tokenResponse.token).header("Content-Type","application/json");
+		//request.header("Authorization","Bearer" +tokenResponse.token).header("Content-Type","application/json");
 		
 		
 		
-		 response = request.body(addbookRequest).post("/BookStore/v1/Books");
+		 //response = request.body(addbookRequest).post("/BookStore/v1/Books");
 		
+		response = Endpoints.addBook(addbookRequest, tokenResponse.token);
 	    
 	    
 	}
@@ -154,15 +164,17 @@ public class testSteps {
 	
 	public void user_removes_book_from_the_list() {
 		
-			RestAssured.baseURI=BASE_URL;
+			//RestAssured.baseURI=BASE_URL;
 		
-		RequestSpecification request =  RestAssured.given();
+		//RequestSpecification request =  RestAssured.given();
+		
 		RemoveBookRequest removeBooks = new RemoveBookRequest(USER_ID, book.isbn);
 		
-		request.header("Authorization","Bearer"+tokenResponse.token).header("Content-Type","application/json");
+		//request.header("Authorization","Bearer"+tokenResponse.token).header("Content-Type","application/json");
 		
 				
-		response =  request.body(removeBooks).delete("/BookStore/v1/Book");
+		//response =  request.body(removeBooks).delete("/BookStore/v1/Book");
+		response = Endpoints.removeBooks(removeBooks, tokenResponse.token);
 		
 	}
 
@@ -172,14 +184,14 @@ public class testSteps {
 		
 		Assert.assertEquals(204, response.getStatusCode());
 		
-			RestAssured.baseURI=BASE_URL;
+			//RestAssured.baseURI=BASE_URL;
 		
-			RequestSpecification request =  RestAssured.given();
+			//RequestSpecification request =  RestAssured.given();
 			
-			request.header("Authorization","Bearer"+tokenResponse.token).header("Content-Type","application/json");
+			//request.header("Authorization","Bearer"+tokenResponse.token).header("Content-Type","application/json");
 			
-			response =  request.get("/BookStore/v1/Books" +USER_ID);
-			 Assert.assertEquals(200, response.getStatusCode());
+			//response =  request.get("/BookStore/v1/Books" +USER_ID);
+			// Assert.assertEquals(200, response.getStatusCode());
 			
 			//String jsonString =  response.asString();
 			
@@ -188,10 +200,13 @@ public class testSteps {
 			//Assert.assertEquals(0, books.size());
 		
 		
-			 userResponse = response.getBody().as(UserAccount.class);
+			// userResponse = response.getBody().as(UserAccount.class);
 			 
-			 Assert.assertEquals(0, userResponse.books.size());
+			// Assert.assertEquals(0, userResponse.books.size());
 		
+		response = Endpoints.getUserAccount(USER_ID, tokenResponse.token);
+		
+		Assert.assertEquals(200, response.getStatusCode());
 		
 		
 		
